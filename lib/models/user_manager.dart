@@ -11,6 +11,12 @@ class UserManager = _UserManager with _$UserManager;
 abstract class _UserManager with Store {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
+  User user;
+
+  _UserManager() {
+    _loadCurrentUser();
+  }
+
   @observable
   bool loading = false;
 
@@ -19,7 +25,10 @@ abstract class _UserManager with Store {
     setLoading(value: true);
     debugPrint('${user.email} ${user.password}');
     try {
-      await auth.signInWithEmailAndPassword(email: user.email, password: user.password);
+      final result =
+          await auth.signInWithEmailAndPassword(email: user.email, password: user.password);
+
+      this.user = result.user;
       onSuccess();
     } on FirebaseAuthException catch (e) {
       onFail(e.message);
@@ -31,5 +40,14 @@ abstract class _UserManager with Store {
   @action
   void setLoading({bool value}) {
     loading = value;
+  }
+
+  void _loadCurrentUser() async {
+    final currentUser = auth.currentUser;
+
+    if (currentUser != null) {
+      user = currentUser;
+      print('UID: ${user.uid}');
+    }
   }
 }
