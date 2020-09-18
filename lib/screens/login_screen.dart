@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:loja_virtual/di.dart';
 import 'package:loja_virtual/helpers/validators.dart';
+import 'package:loja_virtual/models/user.dart';
+import 'package:loja_virtual/models/user_manager.dart';
 
 class LoginScreen extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
+
+  final UserManager userManager = getIt();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: const Text('Entrar'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Card(
+      body: Center(child: Observer(builder: (_) {
+        return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: Form(
             key: formKey,
@@ -24,6 +33,7 @@ class LoginScreen extends StatelessWidget {
               children: <Widget>[
                 TextFormField(
                   controller: emailController,
+                  enabled: !userManager.loading,
                   decoration: const InputDecoration(hintText: 'E-mail'),
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
@@ -37,6 +47,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: passController,
+                  enabled: !userManager.loading,
                   decoration: const InputDecoration(hintText: 'Password'),
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
@@ -59,24 +70,38 @@ class LoginScreen extends StatelessWidget {
                 SizedBox(
                   height: 44,
                   child: RaisedButton(
-                    onPressed: () {
-                      if (formKey.currentState.validate()) {
-                        print(emailController.text);
-                        print(passController.text);
-                      }
-                    },
+                    onPressed: userManager.loading
+                        ? null
+                        : () {
+                            if (formKey.currentState.validate()) {
+                              userManager.signIn(
+                                  user: AppUser(emailController.text, passController.text),
+                                  onFail: (e) {
+                                    scaffoldKey.currentState.showSnackBar(SnackBar(
+                                      content: Text('Fail: $e'),
+                                      backgroundColor: Colors.red,
+                                    ));
+                                  },
+                                  onSuccess: () {
+                                    print('success');
+                                  });
+                            }
+                          },
                     color: Theme.of(context).primaryColor,
-                    child: const Text(
-                      'Sign in',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
+                    disabledColor: Theme.of(context).primaryColor.withAlpha(100),
+                    child: userManager.loading
+                        ? const CircularProgressIndicator()
+                        : const Text(
+                            'Sign in',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
                   ),
                 )
               ],
             ),
           ),
-        ),
-      ),
+        );
+      })),
     );
   }
 }
