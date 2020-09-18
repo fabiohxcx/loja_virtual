@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:loja_virtual/screens/login_screen.dart';
 
 import 'di.dart';
-import 'screens/base_screen.dart';
 
 /// Requires that a Firestore emulator is running locally.
 /// See https://firebase.flutter.dev/docs/firestore/usage#emulator-usage
@@ -26,10 +26,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: BaseScreen(),
+          primarySwatch: Colors.indigo,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          scaffoldBackgroundColor: Colors.indigo,
+          appBarTheme: const AppBarTheme(elevation: 0)),
+      home: LoginScreen(),
     );
   }
 }
