@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:loja_virtual/di.dart';
 import 'package:loja_virtual/helpers/validators.dart';
 import 'package:loja_virtual/models/user.dart';
 import 'package:loja_virtual/models/user_manager.dart';
-import 'package:loja_virtual/screens/signup_screen.dart';
 
-class LoginScreen extends StatelessWidget {
-  static const String id = 'login';
+import '../di.dart';
+
+class SignUpScreen extends StatelessWidget {
+  static const String id = 'signup';
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passController = TextEditingController();
+  final AppUser user = AppUser();
 
   final UserManager userManager = getIt();
 
@@ -22,18 +21,8 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        title: const Text('Entrar'),
+        title: const Text('Sign Up'),
         centerTitle: true,
-        actions: <Widget>[
-          FlatButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacementNamed(SignUpScreen.id);
-              },
-              child: const Text(
-                'New Account',
-                style: TextStyle(color: Colors.white),
-              ))
-        ],
       ),
       body: Center(child: Observer(builder: (_) {
         return Card(
@@ -45,12 +34,37 @@ class LoginScreen extends StatelessWidget {
               shrinkWrap: true,
               children: <Widget>[
                 TextFormField(
-                  controller: emailController,
+                  decoration: const InputDecoration(hintText: 'Name'),
+                  keyboardType: TextInputType.text,
+                  onSaved: (name) => user.name = name,
                   enabled: !userManager.loading,
+                  validator: (name) {
+                    if (name.isEmpty) {
+                      return 'Mandatory Field';
+                    }
+
+                    if (name.trim().split(' ').length <= 1) {
+                      return 'Input full name';
+                    }
+                    if (name.length < 4) {
+                      return 'Name invalid';
+                    }
+
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   decoration: const InputDecoration(hintText: 'E-mail'),
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
+                  enabled: !userManager.loading,
+                  onSaved: (email) => user.email = email,
                   validator: (email) {
+                    if (email.isEmpty) {
+                      return 'Mandatory Field';
+                    }
+
                     if (!emailValid(email)) {
                       return 'E-mail invalid';
                     }
@@ -59,12 +73,12 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: passController,
-                  enabled: !userManager.loading,
                   decoration: const InputDecoration(hintText: 'Password'),
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
+                  enabled: !userManager.loading,
                   obscureText: true,
+                  onSaved: (pass) => user.password = pass,
                   validator: (pass) {
                     if (pass.isEmpty || pass.length < 6) {
                       return 'Password invalid';
@@ -72,12 +86,20 @@ class LoginScreen extends StatelessWidget {
                     return null;
                   },
                 ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: FlatButton(
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      child: const Text('Forgot password')),
+                const SizedBox(height: 16),
+                TextFormField(
+                  decoration: const InputDecoration(hintText: 'Password Again'),
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  obscureText: true,
+                  enabled: !userManager.loading,
+                  onSaved: (pass) => user.confirmPassword = pass,
+                  validator: (pass) {
+                    if (pass.isEmpty || pass.length < 6) {
+                      return 'Password invalid';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -87,9 +109,16 @@ class LoginScreen extends StatelessWidget {
                         ? null
                         : () {
                             if (formKey.currentState.validate()) {
-                              userManager.signIn(
-                                  user: AppUser(
-                                      email: emailController.text, password: passController.text),
+                              formKey.currentState.save();
+
+                              if (user.password != user.confirmPassword) {
+                                scaffoldKey.currentState.showSnackBar(SnackBar(
+                                  content: const Text('Passwords doesn`t match!'),
+                                  backgroundColor: Colors.red,
+                                ));
+                              }
+                              userManager.signUp(
+                                  user: user,
                                   onFail: (e) {
                                     scaffoldKey.currentState.showSnackBar(SnackBar(
                                       content: Text('Fail: $e'),
@@ -106,7 +135,7 @@ class LoginScreen extends StatelessWidget {
                     child: userManager.loading
                         ? const CircularProgressIndicator()
                         : const Text(
-                            'Sign in',
+                            'Sign Up',
                             style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
                   ),

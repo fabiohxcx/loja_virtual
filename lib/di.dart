@@ -7,7 +7,7 @@ import 'models/user_manager.dart';
 final GetIt getIt = GetIt.instance;
 
 void setupDI() {
+  getIt.registerSingleton<UserManager>(UserManager());
   getIt.registerSingleton<PageController>(PageController());
   getIt.registerLazySingleton(() => PageManager(getIt()));
-  getIt.registerLazySingleton(() => UserManager());
 }

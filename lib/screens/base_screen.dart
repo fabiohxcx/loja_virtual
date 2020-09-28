@@ -4,6 +4,7 @@ import 'package:loja_virtual/components/custom_drawer.dart';
 import '../di.dart';
 
 class BaseScreen extends StatelessWidget {
+  static const String id = 'base';
   final PageController pageController = getIt();
 
   @override

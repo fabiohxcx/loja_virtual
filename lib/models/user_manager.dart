@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:loja_virtual/models/user.dart';
@@ -10,12 +11,16 @@ class UserManager = _UserManager with _$UserManager;
 
 abstract class _UserManager with Store {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
-  User user;
+  @observable
+  AppUser user = AppUser();
 
   _UserManager() {
     _loadCurrentUser();
   }
+
+  bool get isLogged => user != null;
 
   @observable
   bool loading = false;
@@ -28,7 +33,32 @@ abstract class _UserManager with Store {
       final result =
           await auth.signInWithEmailAndPassword(email: user.email, password: user.password);
 
-      this.user = result.user;
+      await _loadCurrentUser(firebaseUser: result.user);
+
+      await onSuccess();
+    } on FirebaseAuthException catch (e) {
+      onFail(e.message);
+    }
+    setLoading(value: false);
+  }
+
+  @action
+  void signOut() {
+    auth.signOut();
+    // ignore: parameter_assignments
+    user = null;
+  }
+
+  @action
+  Future<void> signUp({AppUser user, Function onFail, Function onSuccess}) async {
+    setLoading(value: true);
+    debugPrint('${user.email} ${user.password}');
+    try {
+      final result =
+          await auth.createUserWithEmailAndPassword(email: user.email, password: user.password);
+      user.id = result.user.uid;
+      this.user = user;
+      await user.savedData();
       onSuccess();
     } on FirebaseAuthException catch (e) {
       onFail(e.message);
@@ -42,12 +72,15 @@ abstract class _UserManager with Store {
     loading = value;
   }
 
-  void _loadCurrentUser() async {
-    final currentUser = auth.currentUser;
+  Future<void> _loadCurrentUser({User firebaseUser}) async {
+    final currentUser = firebaseUser ?? auth.currentUser;
 
     if (currentUser != null) {
-      user = currentUser;
-      print('UID: ${user.uid}');
+      final docUser = await firebaseFirestore.collection('users').doc(currentUser.uid).get();
+
+      user = AppUser.fromDocument(docUser);
+
+      debugPrint('UID: ${user.id} ${user.name} ${user.email}');
     }
   }
 }

@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:loja_virtual/screens/base_screen.dart';
 import 'package:loja_virtual/screens/login_screen.dart';
+import 'package:loja_virtual/screens/signup_screen.dart';
 
 import 'di.dart';
 
@@ -11,12 +13,13 @@ bool USE_FIRESTORE_EMULATOR = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  setupDI();
   await Firebase.initializeApp();
+
   if (USE_FIRESTORE_EMULATOR) {
     FirebaseFirestore.instance.settings =
         const Settings(host: 'localhost:8080', sslEnabled: false, persistenceEnabled: false);
   }
+  setupDI();
   runApp(MyApp());
 }
 
@@ -30,7 +33,19 @@ class MyApp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
           scaffoldBackgroundColor: Colors.indigo,
           appBarTheme: const AppBarTheme(elevation: 0)),
-      home: LoginScreen(),
+      initialRoute: BaseScreen.id,
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case BaseScreen.id:
+            return MaterialPageRoute(builder: (_) => BaseScreen());
+          case LoginScreen.id:
+            return MaterialPageRoute(builder: (_) => LoginScreen());
+          case SignUpScreen.id:
+            return MaterialPageRoute(builder: (_) => SignUpScreen());
+          default:
+            return MaterialPageRoute(builder: (_) => BaseScreen());
+        }
+      },
     );
   }
 }
