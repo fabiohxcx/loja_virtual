@@ -24,6 +24,21 @@ mixin _$ProductManager on _ProductManager, Store {
     });
   }
 
+  final _$_searchAtom = Atom(name: '_ProductManager._search');
+
+  @override
+  String get _search {
+    _$_searchAtom.reportRead();
+    return super._search;
+  }
+
+  @override
+  set _search(String value) {
+    _$_searchAtom.reportWrite(value, super._search, () {
+      super._search = value;
+    });
+  }
+
   @override
   String toString() {
     return '''
