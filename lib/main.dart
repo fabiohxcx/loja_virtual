@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:loja_virtual/models/product.dart';
 import 'package:loja_virtual/screens/base_screen.dart';
 import 'package:loja_virtual/screens/login_screen.dart';
+import 'package:loja_virtual/screens/product_detail_screen.dart';
 import 'package:loja_virtual/screens/signup_screen.dart';
 
 import 'di.dart';
@@ -42,6 +44,9 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => LoginScreen());
           case SignUpScreen.id:
             return MaterialPageRoute(builder: (_) => SignUpScreen());
+          case ProductDetailScreen.id:
+            return MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: settings.arguments as Product));
           default:
             return MaterialPageRoute(builder: (_) => BaseScreen());
         }
