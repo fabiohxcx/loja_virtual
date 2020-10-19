@@ -109,7 +109,7 @@ class ProductDetailScreen extends StatelessWidget {
                     child: Text(
                       userManager.isLogged
                           ? 'Adicionar ao Carrinho'
-                          : 'Entre para Comprar',
+                          : 'Entre para Comprar ',
                       style: const TextStyle(fontSize: 18),
                     ),
                   ),
