@@ -10,7 +10,8 @@ class ProductListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed(ProductDetailScreen.id, arguments: product);
+        Navigator.of(context)
+            .pushNamed(ProductDetailScreen.id, arguments: product);
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
@@ -19,14 +20,17 @@ class ProductListTile extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           child: Row(
             children: <Widget>[
-              AspectRatio(aspectRatio: 1, child: Image.network(product.images.first)),
+              AspectRatio(
+                  aspectRatio: 1, child: Image.network(product.images.first)),
               const SizedBox(width: 16),
               Expanded(
                   child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(product.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(product.name,
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(

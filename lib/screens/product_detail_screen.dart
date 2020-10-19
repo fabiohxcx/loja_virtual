@@ -1,12 +1,17 @@
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
+import 'package:loja_virtual/components/size_widget.dart';
 import 'package:loja_virtual/models/product.dart';
+import 'package:loja_virtual/models/user_manager.dart';
+
+import '../di.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   static const String id = 'product_detail';
   final Product product;
+  final UserManager userManager = getIt();
 
-  const ProductDetailScreen({Key key, this.product}) : super(key: key);
+  ProductDetailScreen({Key key, this.product}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +39,7 @@ class ProductDetailScreen extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
                   product.name,
@@ -58,8 +63,8 @@ class ProductDetailScreen extends StatelessWidget {
                     color: primaryColor,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16, bottom: 8),
+                const Padding(
+                  padding: EdgeInsets.only(top: 16, bottom: 8),
                   child: Text(
                     'Descrição',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -69,6 +74,46 @@ class ProductDetailScreen extends StatelessWidget {
                   product.description,
                   style: const TextStyle(fontSize: 16),
                 ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 16, bottom: 8),
+                  child: Text(
+                    'Tamanhos',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: product.sizes.map((e) {
+                    return SizeWidget(
+                      size: e,
+                      product: product,
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  height: 44,
+                  child: RaisedButton(
+                    onPressed: product.selectedSize.value != null
+                        ? () {
+                            if (userManager.isLogged) {
+                              // TODO: ADICIONAR AO CARRINHO
+                            } else {
+                              Navigator.of(context).pushNamed('/login');
+                            }
+                          }
+                        : null,
+                    color: primaryColor,
+                    textColor: Colors.white,
+                    child: Text(
+                      userManager.isLogged
+                          ? 'Adicionar ao Carrinho'
+                          : 'Entre para Comprar',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
+                )
               ],
             ),
           )
